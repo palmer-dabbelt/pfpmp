@@ -1,6 +1,8 @@
 # The default target is to build all the binaries.
 all:
 
+-include Makefile.local
+
 # Some variables need to be set in order to build any of the code
 ifeq ($(FIRRTL_HOME),)
 $(error FIRRTL_HOME must be set, it should probably point to rocket-chip/firrtl)
@@ -25,8 +27,21 @@ bin/%: tools/generate-sbt-wrapper-script obj/%/stamp
 
 obj/%/stamp: $(shell find src -iname "*.scala")
 	@mkdir -p $(dir $@)
-	rsync -av --delete $(FIRRTL_HOME) $(dir $@)
+	rsync -rv --delete $(FIRRTL_HOME) $(dir $@)
 	cp -a src/firrtl/* $(dir $@)
 	sed 's/@@TOP_NAME_LOWER@@/$(shell echo $(notdir $@) | tr A-Z a-z)/g' -i $(dir $@)/project/build.scala
 	sed 's/@@TOP_NAME_UPPER@@/$(shell echo $(notdir $@) | tr A-Z A-Z)/g' -i $(dir $@)/project/build.scala
 	date > $@
+
+# Test cases
+.PHONY: check
+check: $(patsubst test/%,check/%,$(shell find test -type f -iname "*.bash"))
+
+check/GenerateHarness/%: test/GenerateHarness/% bin/GenerateHarness
+	@mkdir -p $(dir $@)
+	ptest --test $(abspath $<) --out $@ --args $(abspath $^)
+
+# This prints the status of various test cases
+.PHONY: report
+report: check
+	@+ptest

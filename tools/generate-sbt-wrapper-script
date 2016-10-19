@@ -46,6 +46,6 @@ cat >$output <<EOF
 set -x
 
 cd "${base_dir}"
-true | ${sbt} "run-main ${main} $*"
+true | ${sbt} "run-main ${main} \$*"
 EOF
 chmod +x $output

@@ -1,0 +1,51 @@
+#!/bin/bash
+
+unset output
+unset base_dir
+unset main
+unset sbt
+while [[ "$1" != "" ]]
+do
+    case "$1" in
+    --output) output="$2"; shift;;
+    --basedir) base_dir="$2"; shift;;
+    --main) main="$2"; shift;;
+    --sbt) sbt="$2"; shift;;
+    *) echo "Unknown argument $1"; exit 1;;
+    esac
+    shift
+done
+
+if [[ "$output" == "" ]]
+then
+    echo "provide --output"
+    exit 2
+fi
+
+if [[ "$base_dir" == "" ]]
+then
+    echo "provide --basedir"
+    exit 2
+fi
+
+if [[ "$main" == "" ]]
+then
+    echo "provide --main"
+    exit 2
+fi
+
+if [[ "$sbt" == "" ]]
+then
+    echo "provide --sbt"
+    exit 2
+fi
+
+cat >$output <<EOF
+#!/bin/bash
+
+set -x
+
+cd "${base_dir}"
+true | ${sbt} "run-main ${main} $*"
+EOF
+chmod +x $output

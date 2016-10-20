@@ -18,7 +18,7 @@ class EmitTopVerilog(topName: String) extends PLSIPassManager {
 
   override def operateMiddle() = Seq(
       new passes.InferReadWrite(FirrtlVerilogCompiler.infer_read_write_id),
-      new passes.ReplSeqMem(FirrtlVerilogCompiler.repl_seq_mem_id)
+      new passes.memlib.ReplSeqMem(FirrtlVerilogCompiler.repl_seq_mem_id)
     )
 
   override def operateLow() = Seq(
@@ -69,7 +69,7 @@ object GenerateTop extends App {
         s"${synTop.get}",
         FirrtlVerilogCompiler.infer_read_write_id
       ),
-      passes.ReplSeqMemAnnotation(
+      passes.memlib.ReplSeqMemAnnotation(
         s"-c:${synTop.get}:-o:unused.conf",
         FirrtlVerilogCompiler.repl_seq_mem_id
       )

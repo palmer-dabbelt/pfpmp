@@ -31,6 +31,7 @@ object GenerateTop extends App {
   var output: Option[String] = None
   var synTop: Option[String] = None
   var harnessTop: Option[String] = None
+  var seqMemFlags: Option[String] = Some("-o:unused.confg")
 
   var usedOptions = Set.empty[Integer]
   args.zipWithIndex.foreach{ case (arg, i) =>
@@ -49,6 +50,10 @@ object GenerateTop extends App {
       }
       case "--harness-top" => {
         harnessTop = Some(args(i+1))
+        usedOptions = usedOptions | Set(i+1)
+      }
+      case "--seq-mem-flags" => {
+        seqMemFlags = Some(args(i+1))
         usedOptions = usedOptions | Set(i+1)
       }
       case _ => {
@@ -70,7 +75,7 @@ object GenerateTop extends App {
         FirrtlVerilogCompiler.infer_read_write_id
       ),
       passes.memlib.ReplSeqMemAnnotation(
-        s"-c:${synTop.get}:-o:unused.conf",
+        s"-c:${synTop.get}:${seqMemFlags.get}",
         FirrtlVerilogCompiler.repl_seq_mem_id
       )
     ))

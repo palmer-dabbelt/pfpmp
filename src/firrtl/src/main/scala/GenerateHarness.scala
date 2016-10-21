@@ -31,7 +31,6 @@ object AllModules {
     modules = modules | Set(module)
   }
   def rename(module: String) = {
-    println("name: " + module)
     var new_name = module
     while (modules.contains(new_name))
       new_name = new_name + "_inTestHarness"

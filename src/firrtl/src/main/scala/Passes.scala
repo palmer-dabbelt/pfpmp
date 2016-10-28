@@ -15,7 +15,7 @@ class ConvertToExtMod(classify: (Module) => Boolean) extends Pass {
       case m: ExtModule => m
       case m: Module =>
         if (classify(m)) {
-          new ExtModule(m.info, m.name, m.ports)
+          new ExtModule(m.info, m.name, m.ports, m.name, Seq.empty)
         } else {
           m
         }

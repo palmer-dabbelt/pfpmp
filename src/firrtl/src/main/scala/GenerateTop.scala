@@ -12,7 +12,7 @@ object GenerateTop extends App {
   var synTop: Option[String] = None
   var harnessTop: Option[String] = None
   var seqMemFlags: Option[String] = Some("-o:unused.confg")
-  var listClocks: Option[String] = None
+  var listClocks: Option[String] = Some("-o:unused.clocks")
 
   var usedOptions = Set.empty[Integer]
   args.zipWithIndex.foreach{ case (arg, i) =>
@@ -66,7 +66,7 @@ object GenerateTop extends App {
         s"${synTop.get}"
       ),
       passes.clocklist.ClockListAnnotation(
-        s"${listClocks.get}"
+        s"-c:${synTop.get}:-m:${synTop.get}:${listClocks.get}"
       ),
       passes.memlib.ReplSeqMemAnnotation(
         s"-c:${synTop.get}:${seqMemFlags.get}"

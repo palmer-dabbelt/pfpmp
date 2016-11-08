@@ -6,28 +6,6 @@ import firrtl.Annotations._
 import firrtl.passes.Pass
 import firrtl.Annotations.AnnotationMap
 
-object FirrtlVerilogCompiler {
-  val infer_read_write_id = TransID(-1)
-  val repl_seq_mem_id     = TransID(-2)
-  val clock_list_id       = TransID(-3)
-}
-
-class EmitTopVerilog(topName: String) extends PLSIPassManager {
-  override def operateHigh() = Seq(
-    new ReParentCircuit(topName)
-  )
-
-  override def operateMiddle() = Seq(
-      new passes.InferReadWrite(FirrtlVerilogCompiler.infer_read_write_id),
-      new passes.memlib.ReplSeqMem(FirrtlVerilogCompiler.repl_seq_mem_id)
-    )
-
-  override def operateLow() = Seq(
-      new RemoveUnusedModules,
-      new passes.clocklist.ClockListTransform(FirrtlVerilogCompiler.clock_list_id)
-    )
-}
-
 object GenerateTop extends App {
   var input: Option[String] = None
   var output: Option[String] = None
@@ -74,20 +52,24 @@ object GenerateTop extends App {
   firrtl.Driver.compile(
     input.get,
     output.get,
-    new EmitTopVerilog(synTop.get),
+    new VerilogCompiler(),
     Parser.UseInfo,
+    Seq(
+      new ReParentCircuit(synTop.get),
+      new passes.memlib.InferReadWrite(),
+      new passes.memlib.ReplSeqMem(),
+      new RemoveUnusedModules,
+      new passes.clocklist.ClockListTransform()
+    ),
     AnnotationMap(Seq(
-      passes.InferReadWriteAnnotation(
-        s"${synTop.get}",
-        FirrtlVerilogCompiler.infer_read_write_id
+      passes.memlib.InferReadWriteAnnotation(
+        s"${synTop.get}"
       ),
       passes.clocklist.ClockListAnnotation(
-        s"${listClocks.get}",
-        FirrtlVerilogCompiler.clock_list_id
+        s"${listClocks.get}"
       ),
       passes.memlib.ReplSeqMemAnnotation(
-        s"-c:${synTop.get}:${seqMemFlags.get}",
-        FirrtlVerilogCompiler.repl_seq_mem_id
+        s"-c:${synTop.get}:${seqMemFlags.get}"
       )
     ))
   )

@@ -95,8 +95,8 @@ class RemoveUnusedModulesPass extends Pass {
 }
 
 class RemoveUnusedModules extends Transform with PassBased {
-  def inputForm = LowForm
-  def outputForm = LowForm
+  def inputForm = MidForm
+  def outputForm = MidForm
   def passSeq = Seq(new RemoveUnusedModulesPass)
 
   def execute(state: CircuitState): CircuitState = {

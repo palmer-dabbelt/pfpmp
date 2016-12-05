@@ -4,7 +4,6 @@ import firrtl._
 import firrtl.ir._
 import firrtl.Annotations._
 import firrtl.passes.Pass
-import firrtl.Annotations.AnnotationMap
 
 object GenerateTop extends App {
   var input: Option[String] = None
@@ -56,9 +55,9 @@ object GenerateTop extends App {
     Parser.UseInfo,
     Seq(
       new ReParentCircuit(synTop.get),
+      new RemoveUnusedModules,
       new passes.memlib.InferReadWrite(),
       new passes.memlib.ReplSeqMem(),
-      new RemoveUnusedModules,
       new passes.clocklist.ClockListTransform()
     ),
     AnnotationMap(Seq(

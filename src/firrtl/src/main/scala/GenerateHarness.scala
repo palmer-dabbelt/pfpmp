@@ -4,7 +4,6 @@ import firrtl._
 import firrtl.ir._
 import firrtl.Annotations._
 import firrtl.passes.Pass
-import firrtl.Annotations.AnnotationMap
 
 object AllModules {
   private var modules = Set[String]()

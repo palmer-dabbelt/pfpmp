@@ -2,7 +2,7 @@
 
 import firrtl._
 import firrtl.ir._
-import firrtl.Annotations._
+import firrtl.annotations._
 import firrtl.passes.Pass
 
 object AllModules {

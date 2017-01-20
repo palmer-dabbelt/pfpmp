@@ -7,7 +7,7 @@ import firrtl.passes.Pass
 // Converts some modules to external modules, based on a given function.  If
 // that function returns "true" then the module is converted into an ExtModule,
 // otherwise it's left alone.
-class ConvertToExtMod(classify: (Module) => Boolean) extends Pass {
+class ConvertToExtModPass(classify: (Module) => Boolean) extends Pass {
   def name = "Convert to External Modules"
 
   def run(c: Circuit): Circuit = {
@@ -23,9 +23,18 @@ class ConvertToExtMod(classify: (Module) => Boolean) extends Pass {
     Circuit(c.info, modulesx, c.main)
   }
 }
+class ConvertToExtMod(classify: (Module) => Boolean) extends Transform with PassBased {
+  def inputForm = MidForm
+  def outputForm = MidForm
+  def passSeq = Seq(new ConvertToExtModPass(classify))
+
+  def execute(state: CircuitState): CircuitState = {
+    CircuitState(runPasses(state.circuit), state.form)
+  }
+}
 
 // "Re-Parents" a circuit, which changes the top module to something else.
-class ReParentCircuit(newTopName: String) extends Pass {
+class ReParentCircuitPass(newTopName: String) extends Pass {
   def name = "Re-Parent Circuit"
 
   def run(c: Circuit): Circuit = {
@@ -33,9 +42,19 @@ class ReParentCircuit(newTopName: String) extends Pass {
   }
 }
 
+class ReParentCircuit(newTopName: String) extends Transform with PassBased {
+  def inputForm = HighForm
+  def outputForm = HighForm
+  def passSeq = Seq(new ReParentCircuitPass(newTopName))
+
+  def execute(state: CircuitState): CircuitState = {
+    CircuitState(runPasses(state.circuit), state.form)
+  }
+}
+
 // Removes all the unused modules in a circuit by recursing through every
 // instance (starting at the main module)
-class RemoveUnusedModules extends Pass {
+class RemoveUnusedModulesPass extends Pass {
   def name = "Remove Unused Modules"
 
   def run(c: Circuit): Circuit = {
@@ -72,5 +91,15 @@ class RemoveUnusedModules extends Pass {
     val usedModuleSeq = c.modules.filter { usedModuleSet contains _.name }
 
     Circuit(c.info, usedModuleSeq, c.main)
+  }
+}
+
+class RemoveUnusedModules extends Transform with PassBased {
+  def inputForm = MidForm
+  def outputForm = MidForm
+  def passSeq = Seq(new RemoveUnusedModulesPass)
+
+  def execute(state: CircuitState): CircuitState = {
+    CircuitState(runPasses(state.circuit), state.form)
   }
 }

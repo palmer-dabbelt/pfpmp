@@ -8,7 +8,7 @@ import firrtl.passes.Pass
 // Verilog black box and therefor can't be renamed.  Since the point is to
 // allow FIRRTL to be linked together using "cat" and ExtModules don't get
 // emitted, this should be safe.
-class RenameModulesAndInstances(rename: (String) => String) extends Pass {
+class RenameModulesAndInstancesPass(rename: (String) => String) extends Pass {
   def name = "Rename Modules and Instances"
 
   def renameInstances(body: Statement): Statement = {
@@ -29,3 +29,12 @@ class RenameModulesAndInstances(rename: (String) => String) extends Pass {
   }
 }
 
+class RenameModulesAndInstances(rename: (String) => String) extends Transform with PassBased {
+  def inputForm = LowForm
+  def outputForm = LowForm
+  def passSeq = Seq(new RenameModulesAndInstancesPass(rename))
+
+  def execute(state: CircuitState): CircuitState = {
+    CircuitState(runPasses(state.circuit), state.form)
+  }
+}

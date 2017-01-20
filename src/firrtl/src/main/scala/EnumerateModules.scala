@@ -4,7 +4,7 @@ import firrtl._
 import firrtl.ir._
 import firrtl.passes.Pass
 
-class EnumerateModules(enumerate: (Module) => Unit) extends Pass {
+class EnumerateModulesPass(enumerate: (Module) => Unit) extends Pass {
   def name = "Enumurate Modules"
 
   def run(c: Circuit): Circuit = {
@@ -19,3 +19,12 @@ class EnumerateModules(enumerate: (Module) => Unit) extends Pass {
   }
 }
 
+class EnumerateModules(enumerate: (Module) => Unit) extends Transform with PassBased {
+  def inputForm = LowForm
+  def outputForm = LowForm
+  def passSeq = Seq(new EnumerateModulesPass(enumerate))
+
+  def execute(state: CircuitState): CircuitState = {
+    CircuitState(runPasses(state.circuit), state.form)
+  }
+}
